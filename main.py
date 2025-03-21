@@ -1,43 +1,44 @@
-
 import subprocess
 import time
 import asyncio
 from aiohttp import web
 
-URL = "https://awake-yolanthe-qexdy3-f008b061.koyeb.app/"
+URLS = [
+    "https://awake-yolanthe-qexdy3-f008b061.koyeb.app/",
+    "https://zygomorphic-suellen-qexdy4-56b26d2d.koyeb.app/"
+]
 
-async def check_url():
-    """Функция для проверки доступности URL."""
+async def check_urls():
+    """Функция для проверки доступности всех URL."""
     while True:
-        try:
-            result = subprocess.run(
-                ["curl", "-s", "-o", "/dev/null", "-w", "%{http_code}", URL], 
-                capture_output=True, 
-                text=True
-            )
-            status = result.stdout.strip()
-            print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Статус код: {status}")
-        except Exception as e:
-            print(f"Ошибка: {e}")
+        for url in URLS:
+            try:
+                result = subprocess.run(
+                    ["curl", "-s", "-o", "/dev/null", "-w", "%{http_code}", url], 
+                    capture_output=True, 
+                    text=True
+                )
+                status = result.stdout.strip()
+                print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] {url} -> Статус код: {status}")
+            except Exception as e:
+                print(f"Ошибка при проверке {url}: {e}")
 
         await asyncio.sleep(120)  # Ожидание 2 минуты
 
 async def handle(request):
-    """Ответ сервера на запросы."""
+    """Ответ веб-сервера."""
     return web.Response(text="Сервер работает!")
 
 async def web_server():
-    """Создание и запуск веб-сервера."""
+    """Создание веб-сервера."""
     app = web.Application()
     app.router.add_get("/", handle)
     return app
 
 async def main():
     """Запуск веб-сервера и проверки URL параллельно."""
-    # Запускаем проверку URL
-    asyncio.create_task(check_url())
+    asyncio.create_task(check_urls())  # Запускаем проверку URL в фоне
 
-    # Запускаем веб-сервер
     app = await web_server()
     runner = web.AppRunner(app)
     await runner.setup()
@@ -48,5 +49,5 @@ async def main():
     while True:
         await asyncio.sleep(3600)  # Бесконечный цикл для работы сервера
 
-# Запуск асинхронного кода
+# Запуск
 asyncio.run(main())
