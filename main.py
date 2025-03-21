@@ -20,7 +20,7 @@ async def check_url():
         except Exception as e:
             print(f"Ошибка: {e}")
 
-        await asyncio.sleep(120)  # Ожидание 2 минуты
+        await asyncio.sleep(600)  # Ожидание 2 минуты
 
 async def handle(request):
     """Ответ сервера на запросы."""
