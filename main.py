@@ -39,7 +39,7 @@ async def send_messages():
                     try:
                         await client(SendMessageRequest(chat, massage1))
                         print(f"✅ Сообщение отправлено в {chat}")
-                        delay = random.uniform(30, 60)  # Интервал 30-60 секунд
+                        delay = random.uniform(180, 300)  # Интервал 30-60 секунд
                         print(f"⏳ Ожидание {delay:.2f} секунд перед следующим сообщением...")
                         await asyncio.sleep(delay)
                     except FloodWaitError as e:
