@@ -2,4 +2,3 @@ asyncio
 aiohttp
 telethon
 asyncio
-subprocess
