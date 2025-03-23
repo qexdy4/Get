@@ -10,6 +10,19 @@ API_ID = 29739265  # Замените на ваш API_ID
 API_HASH = "9475db10c792d716e97a51f608871263"  # Замените на ваш API_HASH
 SESSION_NAME = "joiner_session"
 
+# --- Настройки прокси ---
+PROXY_IP = "98.152.200.61"  
+PROXY_PORT = 8081  
+PROXY_TYPE = "http"  # Измени на "socks5", если используешь SOCKS5
+
+# Подключение к прокси
+if PROXY_TYPE == "socks5":
+    PROXY = (PROXY_IP, PROXY_PORT, "socks5")
+elif PROXY_TYPE == "http":
+    PROXY = ("http", PROXY_IP, PROXY_PORT)
+else:
+    PROXY = None  # Без прокси
+
 massage1 = """♻️ Хочешь зарабатывать на автомате?
 Рекламируй нашего Telegram-бота и получай деньги без ограничений! 📈
 🔸 Чем больше привёл людей – тем больше заработал!
@@ -19,10 +32,10 @@ massage1 = """♻️ Хочешь зарабатывать на автомате
 
 async def send_messages():
     """Функция для рассылки сообщений в Telegram."""
-    while True:  # Если соединение разорвётся, перезапускаем
+    while True:
         try:
-            async with TelegramClient(SESSION_NAME, API_ID, API_HASH) as client:
-                await client.start()  # Полное подключение
+            async with TelegramClient(SESSION_NAME, API_ID, API_HASH, proxy=PROXY) as client:
+                await client.start()
                 if not await client.is_user_authorized():
                     print("Ошибка: клиент не авторизован.")
                     return
@@ -34,8 +47,8 @@ async def send_messages():
                     try:
                         await client(SendMessageRequest(chat, massage1))
                         print(f"✅ Сообщение отправлено в {chat}")
-                        delay = random.uniform(30, 60)  # Интервал 20-30 минут
-                        print(f"⏳ Ожидание {delay / 60:.2f} минут перед следующим сообщением...")
+                        delay = random.uniform(30, 60)  
+                        print(f"⏳ Ожидание {delay:.2f} секунд перед следующим сообщением...")
                         await asyncio.sleep(delay)
                     except FloodWaitError as e:
                         print(f"⚠️ FloodWait: необходимо подождать {e.seconds} секунд.")
@@ -45,23 +58,19 @@ async def send_messages():
 
         except Exception as e:
             print(f"🚨 Ошибка соединения: {e}. Перезапуск через 30 сек...")
-            await asyncio.sleep(30)  # Подождать 30 секунд и повторить попытку
+            await asyncio.sleep(30)  
 
 async def handle(request):
-    """Ответ веб-сервера на запросы."""
     return web.Response(text="Сервер работает!")
 
 async def web_server():
-    """Создание и запуск веб-сервера."""
     app = web.Application()
     app.router.add_get("/", handle)
     return app
 
 async def main():
-    """Запуск всех процессов: Telegram и веб-сервер."""
-    asyncio.create_task(send_messages())  # Рассылка сообщений
+    asyncio.create_task(send_messages())  
 
-    # Запускаем веб-сервер
     app = await web_server()
     runner = web.AppRunner(app)
     await runner.setup()
@@ -70,7 +79,6 @@ async def main():
 
     print("🌍 Веб-сервер запущен на порту 8080...")
     while True:
-        await asyncio.sleep(3600)  # Бесконечный цикл для работы сервера
+        await asyncio.sleep(3600)  
 
-# Запуск асинхронного кода
 asyncio.run(main())
